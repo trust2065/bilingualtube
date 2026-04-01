@@ -197,6 +197,9 @@ function setupSubtitleUI() {
   let currentCue: TranslationToken | null = null;
   let currentTranslationCue: TranslationToken | null = null;
   const clean = store.subscribe(async (currentTime) => {
+    // 🌟 新增：即時取得最新設定
+    const settings = await eventMessager.sendMessage('getSettings');
+
     const cue = findMatchingSubtitle(store.subtitle?.cues || [], currentTime);
 
     // Find official translation subtitles (if available)
@@ -229,7 +232,10 @@ function setupSubtitleUI() {
 
       const sourceLang = store.subtitle?.lang;
       // 🌟 新增：如果不是英文影片（例如原本就是繁體中文影片），只顯示單行原文
-      if (sourceLang && !sourceLang.toLowerCase().startsWith('en')) {
+      if (
+        settings.enableTranslation === false ||
+        sourceLang && !sourceLang.toLowerCase().startsWith('en')
+      ) {
         // 第二個參數不傳，我們的 UI 就會自動把翻譯層隱藏起來
         subtitleOverlay.update(cue.text);
       } else {
@@ -523,6 +529,12 @@ async function isChineseVariantConversion(): Promise<boolean> {
 
 async function triggerTranslation(currentTime: number) {
   if (isTranslating) return;
+
+  // 🌟 新增：讀取設定，如果關閉翻譯，直接罷工
+  const settings = await eventMessager.sendMessage('getSettings');
+  if (settings.enableTranslation === false) {
+    return;
+  }
 
   // 🌟 新增：僅當影片原始字幕為英文時，才觸發 API 翻譯
   const sourceLang = store.subtitle?.lang;

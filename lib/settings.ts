@@ -3,6 +3,7 @@ import { DefaultLLMPrompt } from './translate/openai';
 import { type ToLang } from './translate/lang';
 
 export interface Settings {
+  enableTranslation?: boolean // 🌟 新增這行：翻譯總開關
   to?: ToLang;
   engine?: 'microsoft' | 'openai';
 
@@ -14,6 +15,7 @@ export interface Settings {
 
 export function getDefaultSettings(): Pick<Settings, OptionalKeysOf<Settings>> {
   return {
+    enableTranslation: true, // 🌟 預設為開啟
     to: 'zh-Hant',
     engine: 'microsoft',
     'openai.baseUrl': 'https://api.openai.com/v1',

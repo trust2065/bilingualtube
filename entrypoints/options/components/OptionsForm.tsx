@@ -1,60 +1,60 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { getMergedSettings, getSyncSettings, setSyncSettings, Settings } from '@/lib/settings'
-import { toast } from 'sonner'
-import { FaDiscord } from 'react-icons/fa'
-import { langs, ToLang } from '../../../lib/translate/lang'
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { getMergedSettings, getSyncSettings, setSyncSettings, Settings } from '@/lib/settings';
+import { toast } from 'sonner';
+import { FaDiscord } from 'react-icons/fa';
+import { langs, ToLang } from '../../../lib/translate/lang';
 
 export function OptionsForm() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   // Load merged settings for display
   const { data: settings, isLoading, error } = useQuery({
     queryKey: ['settings'],
     queryFn: getMergedSettings,
-  })
+  });
 
   // Save settings mutation
   const saveMutation = useMutation({
     mutationFn: setSyncSettings,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] })
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
     },
     onError: (error) => {
-      toast.error('Failed to save settings')
-      console.error(error)
+      toast.error('Failed to save settings');
+      console.error(error);
     },
-  })
+  });
 
   // Auto-save function - only save user settings, not defaults
   const updateSetting = async (updates: Partial<Settings>) => {
-    const syncSettings = await getSyncSettings()
-    const newSettings = { ...syncSettings, ...updates }
-    saveMutation.mutate(newSettings)
-  }
+    const syncSettings = await getSyncSettings();
+    const newSettings = { ...syncSettings, ...updates };
+    saveMutation.mutate(newSettings);
+  };
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-muted-foreground">Loading settings...</div>
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -64,12 +64,12 @@ export function OptionsForm() {
           Error loading settings: {error.message}
         </div>
       </div>
-    )
+    );
   }
 
-  if (!settings) return null
+  if (!settings) return null;
 
-  const currentEngine = settings.engine || 'microsoft'
+  const currentEngine = settings.engine || 'microsoft';
 
   return (
     <div className="container max-w-4xl mx-auto px-2 py-4 md:px-0 md:py-8 space-y-6">
@@ -99,6 +99,22 @@ export function OptionsForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* 🌟 新增：翻譯總開關 */}
+          <div className="space-y-2">
+            <Label htmlFor="enable-translation">Translation Enable</Label>
+            <Select
+              value={settings.enableTranslation !== false ? 'true' : 'false'}
+              onValueChange={(value) => updateSetting({ enableTranslation: value === 'true' })}
+            >
+              <SelectTrigger id="enable-translation">
+                <SelectValue placeholder="Toggle translation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">Enabled (雙語字幕)</SelectItem>
+                <SelectItem value="false">Disabled (僅顯示原文)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           {/* Target Language - Always visible */}
           <div className="space-y-2">
             <Label htmlFor="to">Target Language</Label>
@@ -201,5 +217,5 @@ export function OptionsForm() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
