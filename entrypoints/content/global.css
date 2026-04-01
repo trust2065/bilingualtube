@@ -1,44 +1,59 @@
+/* 隱藏 YouTube 原生字幕，但保留直播的原生字幕顯示 */
 #movie_player:not(:has(.ytp-live)) #ytp-caption-window-container {
   display: none !important;
 }
 
+/* 雙語字幕的總容器 */
 #bilingual-tube-subtitle-overlay {
   display: none;
-
   position: absolute;
   z-index: 99999;
   touch-action: none;
   text-align: center;
-  overflow: hidden;
-  width: 65%;
-  left: calc((100% - 65%) / 2);
-  bottom: calc(var(--yt-delhi-bottom-controls-height, 72px) + 2%);
-
-  white-space: pre-wrap;
-  font-size: 2.5rem;
-  color: rgb(255, 255, 255);
-  fill: rgb(255, 255, 255);
-  font-family: 'YouTube Noto', Roboto, Arial, Helvetica, Verdana,
-    'PT Sans Caption', sans-serif;
+  
+  /* 將寬度稍微加寬，避免稍微長一點的句子提早斷行 */
+  width: 100%;
+  left: 0%; 
+  
+  /* 讓高度動態適應 YouTube 控制列 */
+  bottom: calc(var(--yt-delhi-bottom-controls-height, 72px) + 24px);
+  
+  /* 字型設定：盡可能貼近 YouTube 原生 */
+  font-family: "yt-core-sans-serif", "YouTube Noto", Roboto, Arial, Helvetica, sans-serif;
+  /* 🌟 核心修改：使用 clamp 讓字體大小跟著播放器視窗縮放，取代寫死的 2.5rem */
+  font-size: clamp(16px, 2.5vw, 32px); 
+  font-weight: 400;
+  text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5); /* 微幅的文字陰影增加銳利度 */
 }
 
+/* 兩行字幕的通用外觀（黑底白字） */
 #bilingual-tube-subtitle-overlay .subtitle-original,
 #bilingual-tube-subtitle-overlay .subtitle-translated {
   display: inline-block;
-  background: rgba(8, 8, 8, 0.75);
-  padding: 0 1rem;
+  background-color: rgba(8, 8, 8, 0.75); /* YouTube 經典半透明黑底 */
+  color: lightblue;
+  padding: 4px 8px;
+  border-radius: 2px; /* 加上微小的圓角，看起來更現代 */
+  line-height: 1.3;
+  white-space: pre-wrap;
 }
 
+/* 🌟 核心修改：建立視覺層級 (Visual Hierarchy) */
 #bilingual-tube-subtitle-overlay .subtitle-translated {
   opacity: 0.9;
+  color: #e2e2e2; /* 將翻譯字幕調暗一點點，幫助大腦快速區分主副語言 */
+  font-size: 0.9em; /* 讓翻譯字幕比原文稍微小 10% */
 }
 
+/* 當影片播放器開啟字幕時才顯示，並處理排版 */
 #movie_player:has([aria-pressed='true']) #bilingual-tube-subtitle-overlay {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 6px; /* 兩行字幕之間的間距，避免黏在一起 */
 }
 
+/* 當滑鼠移開，YouTube 隱藏控制列時，字幕往下沉 */
 #movie_player.ytp-autohide #bilingual-tube-subtitle-overlay {
-  bottom: 2%;
+  bottom: 24px;
 }
